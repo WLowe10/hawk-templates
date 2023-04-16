@@ -1,4 +1,4 @@
-export const traverseObject = (object: any, path: string) => {
+export const objectPath = (object: any, path: string) => {
     const levels = path.split(".");
     let current = object;
 

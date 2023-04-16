@@ -1,62 +1,26 @@
 import jsonpointer from "jsonpointer";
-import { VM } from "vm2";
-import { safeParse } from "./helpers";
-
-const context = {
-    age: 19,
-    name: "john",
-    test: {
-        height: "50"
-    }
-};
+import { template as tp, safeParse, traverseEditObject, objectPath } from "./helpers";
 
 export const parse = (template: string | object) => {
     if (typeof template !== "string" && typeof template !== "object") return template;
 
-    const handleStringTemplate = (str: string) => {
-        const rgx = new RegExp(/{{\s*(.*?)\s*}}/g);
+    const handleStringTemplate = (strTemplate: string) => {
+        return (context: any) => {
+            return tp(strTemplate, context);
+        }
+    };   
 
-        if (str.startsWith("ref$:")) {
-            return (context: any) => {
-                const ref = str.split("ref$:")[1];
-                const value = jsonpointer.get(context, ref);
-
-                return value;
-            };
-        } else {
-            const matches = [...str.matchAll(rgx)];
-
-            return (context: any) => {
-                const vm = new VM({
-                    sandbox: context
-                });
-
-                let newVal = str;
-
-                matches.forEach(([temp, val, idx]) => {
-                    if (!val) return;
-
-                    const result = vm.run(val);
-                    newVal = newVal.replace(temp, result);
-                })
-
-                return safeParse(newVal);
-            }
+    const handleObjectTemplate = (objTemplate: object) => {
+        return (context: any) => {
+            return traverseEditObject(objTemplate, (field: { type: "ref" | "string", ref: "string", string: "string" }) => {
+                if (field.type == "ref") {
+                    return jsonpointer.get(context, field.ref);
+                } else if (field.type == "string") {
+                    return tp(field.string, context);
+                }
+            })
         }
     };
-};
 
-const template = parse("hi my name is {{name}} and i am {{ age + 1 }} years old. my height is {{test.height}}");
-// const template = parse("ref$:/age")
-// const template = parse("/age")
-// console.log(template(context))
-
-// const obj = {
-//     deps: {
-//         scripts: {
-//             brow1: "adwadwdwcjdncjdn"
-//         }
-//     }
-// };
-
-// console.log(jsonpointer.get(obj, "/deps/scripts/brow1"))
+    return typeof template == "string" ? handleStringTemplate(template) : handleObjectTemplate(template);
+}
