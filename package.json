@@ -6,7 +6,7 @@
   "types": "./dist/index.d.ts",
   "scripts": {
     "test": "jest",
-    "build": "tsup ./src/index.ts --dts",
+    "build": "tsup ./src/index.ts --dts --format cjs",
     "prepublishOnly": "npm run build && npm version patch"
   },
   "keywords": [
@@ -19,13 +19,15 @@
     "dist",
     "package.json"
   ],
+  "dependencies": {
+    "vm2": "^3.9.16",
+    "jsonpointer": "^5.0.1"
+  },
   "devDependencies": {
     "@types/jest": "^29.5.0",
-    "jsonpointer": "^5.0.1",
     "ts-jest": "^29.1.0",
     "ts-node": "^10.9.1",
     "tsup": "^6.7.0",
-    "typescript": "^5.0.4",
-    "vm2": "^3.9.16"
+    "typescript": "^5.0.4"
   }
 }

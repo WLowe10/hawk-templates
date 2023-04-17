@@ -6,7 +6,8 @@ describe("Hawk-templates Test", () => {
         age: 50,
         stats: {
             height: 70,
-        }
+        },
+        testArr: ["one", 2, "three"]
     };
 
     test("String template works", () => {
@@ -86,5 +87,56 @@ describe("Hawk-templates Test", () => {
                 two: context.name
             }
         });
+    })
+
+    test("template works with arrays", () => {
+        const template = parse(["one", "{{age}}"]);
+        const result = template(context);
+
+        expect(result).toEqual(["one", context.age]);
+    })
+
+    // test("template works with editing a object", () => {
+    //     const template = parse(["one", "{{age}}"]);
+    //     const result = template(context);
+
+    //     expect(result).toEqual(["one", context.age]);
+    // })
+
+    test("stress test", () => {
+        const template = parse([
+            { "$ref": "/name" }, 
+            {
+                test: {
+                    test: {
+                        test: {
+                            arr: {
+                                items: ["age: {{age}}", { "$ref": "/stats" }]
+                            },
+                            height: {
+                                "$ref": "/stats/height"
+                            }
+                        }
+                    }
+                }
+            }
+        ]);
+        const result = template(context);
+
+        expect(result).toEqual([
+            context.name,
+            {
+                test: {
+                    test: {
+                        test: {
+                            arr: {
+                                items: [`age: ${context.age}`, context.stats]
+                            },
+                            height: context.stats.height
+                        }
+                    }
+                }
+            }
+        ]);
     })
 })
