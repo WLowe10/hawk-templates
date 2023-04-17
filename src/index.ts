@@ -38,24 +38,3 @@ export const parse = (template: string | object) => {
 
     return typeof template == "string" ? handleStringTemplate(template) : handleObjectTemplate(template);
 }
-
-// const template = parse({
-//     script: {
-//         "$ref": "/scripts/script1"
-//     }
-// })
-
-// const result = template({ 
-//     scripts: {
-//         script1: {
-//             src: "console.log('script 1')"
-//         }
-//     }
-// });
-
-//doesnt have the number in a string since the safeParse function called in the template
-const template = parse(["yes", "{{age || Math.random().toString()}}"])
-
-console.log(template({
-    age: 0
-}));
